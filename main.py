@@ -3,6 +3,10 @@ import pygame
 pygame.init()
 
 screen = pygame.display.set_mode((1280,720))
+SCREEN_MIN_WIDTH = 0
+SCREEN_MAX_WIDTH = 1280
+SCREEN_MIN_HEIGHT = 0
+SCREEN_MAX_HEIGHT = 720
 
 clock = pygame.time.Clock()
 
@@ -12,8 +16,8 @@ game_running = True
 ZOO_BACKGROUND_COLOUR = (126, 200, 80) # Light green
 ZOOKEEPER_STARTING_X_POS = 30
 ZOOKEEPER_STARTING_Y_POS = 30
-speed = 0
 x_direction = 0
+y_direction = 0
 
 # TODO: Implement Animal class
 
@@ -35,8 +39,11 @@ class Zookeeper:
     def display(self):
         self.zookeeperRect = pygame.draw.rect(screen, self.colour, self.zookeeperRect)
 
-    # def move(self, speed):
+    def move(self, x_direction, y_direction):
+        self.zookeeperRect.x += self.movement_speed * x_direction
+        self.zookeeperRect.y += self.movement_speed * y_direction
 
+zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 10)
 
 while game_running:
     keys = pygame.key.get_pressed()
@@ -47,11 +54,16 @@ while game_running:
             raise SystemExit
 
     # Do logical updates here.
-    # if keys[pygame.K_d]:
-
+    if keys[pygame.K_d] and zookeeper.zookeeperRect.x < SCREEN_MAX_WIDTH - zookeeper.width:
+        zookeeper.move(1, 0)
+    if keys[pygame.K_a] and zookeeper.zookeeperRect.x > SCREEN_MIN_WIDTH:
+        zookeeper.move(-1, 0)
+    if keys[pygame.K_w] and zookeeper.zookeeperRect.y > SCREEN_MIN_HEIGHT:
+        zookeeper.move(0, -1)
+    if keys[pygame.K_s] and zookeeper.zookeeperRect.y < SCREEN_MAX_HEIGHT - zookeeper.height:
+        zookeeper.move(0, 1)
 
     screen.fill(ZOO_BACKGROUND_COLOUR)  # Fill the display with a solid color
-    zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 10)
 
     # Render the graphics here.
     zookeeper.display()
