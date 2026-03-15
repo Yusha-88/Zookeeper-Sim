@@ -20,6 +20,26 @@ x_direction = 0
 y_direction = 0
 
 # TODO: Implement Animal class
+class Animal:
+    def __init__(self, species, x_pos, y_pos, height, width, colour, movement_speed):
+        self.species = species
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.height = height
+        self.width = width
+        self.colour = colour
+        self.health = 100
+        self.movement_speed = movement_speed
+
+        self.animalRect = pygame.Rect(x_pos, y_pos, height, width)
+        # Blit of animal to screen
+        self.animalRect = pygame.draw.rect(screen, self.colour, self.animalRect)
+
+    # TODO: Display method
+    def display(self):
+        self.animalRect = pygame.draw.rect(screen,self.colour, self.animalRect)
+
+    # TODO: Move method
 
 # TODO: Implement Zookeeper class
 class Zookeeper:
@@ -43,7 +63,10 @@ class Zookeeper:
         self.zookeeperRect.x += self.movement_speed * x_direction
         self.zookeeperRect.y += self.movement_speed * y_direction
 
+    # TODO: Feed animal method
+
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 10)
+penguin = Animal("Penguin", 80, 80, 10, 10, "white", 5)
 
 while game_running:
     keys = pygame.key.get_pressed()
@@ -63,10 +86,11 @@ while game_running:
     if keys[pygame.K_s] and zookeeper.zookeeperRect.y < SCREEN_MAX_HEIGHT - zookeeper.height:
         zookeeper.move(0, 1)
 
-    screen.fill(ZOO_BACKGROUND_COLOUR)  # Fill the display with a solid color
+    screen.fill(ZOO_BACKGROUND_COLOUR)  # Fill the display with a solid colour
 
     # Render the graphics here.
     zookeeper.display()
+    penguin.display()
 
     pygame.display.flip()  # Refresh on-screen display
     clock.tick(60)         # wait until next frame (at 60 FPS)
