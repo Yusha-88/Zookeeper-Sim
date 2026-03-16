@@ -1,4 +1,6 @@
 import pygame
+import random
+import time
 
 pygame.init()
 
@@ -40,6 +42,11 @@ class Animal:
         self.animalRect = pygame.draw.rect(screen,self.colour, self.animalRect)
 
     # TODO: Move method
+    def move(self):
+        x_direction = random.randint(-1,1)
+        y_direction = random.randint(-1, 1)
+        self.animalRect.x += self.movement_speed * x_direction
+        self.animalRect.y += self.movement_speed * y_direction
 
 # TODO: Implement Zookeeper class
 class Zookeeper:
@@ -85,6 +92,9 @@ while game_running:
         zookeeper.move(0, -1)
     if keys[pygame.K_s] and zookeeper.zookeeperRect.y < SCREEN_MAX_HEIGHT - zookeeper.height:
         zookeeper.move(0, 1)
+
+    # NPC movement
+    penguin.move()
 
     screen.fill(ZOO_BACKGROUND_COLOUR)  # Fill the display with a solid colour
 
