@@ -37,7 +37,6 @@ class Animal:
         # Blit of animal to screen
         self.animalRect = pygame.draw.rect(screen, self.colour, self.animalRect)
 
-    # TODO: Display method
     def display(self):
         self.animalRect = pygame.draw.rect(screen,self.colour, self.animalRect)
 
@@ -45,8 +44,9 @@ class Animal:
     def move(self):
         x_direction = random.randint(-1,1)
         y_direction = random.randint(-1, 1)
-        self.animalRect.x += self.movement_speed * x_direction
-        self.animalRect.y += self.movement_speed * y_direction
+        if SCREEN_MIN_WIDTH <= self.animalRect.x < SCREEN_MAX_WIDTH - self.width and SCREEN_MIN_HEIGHT + 10 <= self.animalRect.y < SCREEN_MAX_HEIGHT - self.height:
+            self.animalRect.x += self.movement_speed * x_direction
+            self.animalRect.y += self.movement_speed * y_direction
 
 # TODO: Implement Zookeeper class
 class Zookeeper:
@@ -73,7 +73,7 @@ class Zookeeper:
     # TODO: Feed animal method
 
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 10)
-penguin = Animal("Penguin", 80, 80, 10, 10, "white", 5)
+penguin = Animal("Penguin", 80, 80, 10, 10, "white", 1)
 
 while game_running:
     keys = pygame.key.get_pressed()
