@@ -10,6 +10,8 @@ SCREEN_MAX_WIDTH = 1280
 SCREEN_MIN_HEIGHT = 0
 SCREEN_MAX_HEIGHT = 720
 
+pygame.display.set_caption("Zookeeper")
+
 clock = pygame.time.Clock()
 
 game_running = True
@@ -44,7 +46,15 @@ class Animal:
     def move(self):
         x_direction = random.randint(-1,1)
         y_direction = random.randint(-1, 1)
-        if SCREEN_MIN_WIDTH <= self.animalRect.x < SCREEN_MAX_WIDTH - self.width and SCREEN_MIN_HEIGHT + 10 <= self.animalRect.y < SCREEN_MAX_HEIGHT - self.height:
+        if self.animalRect.y <= SCREEN_MIN_HEIGHT:
+            self.animalRect.y = 1 + self.animalRect.y
+        elif self.animalRect.y >= SCREEN_MAX_HEIGHT - self.height:
+            self.animalRect.y = self.animalRect.y - 1
+        elif self.animalRect.x <= SCREEN_MIN_WIDTH:
+            self.animalRect.x = 1 + self.animalRect.x
+        elif self.animalRect.x >= SCREEN_MAX_WIDTH - self.width:
+            self.animalRect.x = self.animalRect.x - 1
+        else:
             self.animalRect.x += self.movement_speed * x_direction
             self.animalRect.y += self.movement_speed * y_direction
 
@@ -73,7 +83,7 @@ class Zookeeper:
     # TODO: Feed animal method
 
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 10)
-penguin = Animal("Penguin", 80, 80, 10, 10, "white", 1)
+penguin = Animal("Penguin", 100, 100, 10, 10, "white", 1)
 
 while game_running:
     keys = pygame.key.get_pressed()
