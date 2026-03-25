@@ -5,9 +5,9 @@ import time
 pygame.init()
 
 screen = pygame.display.set_mode((1280,720))
-SCREEN_MIN_WIDTH = 0
+SCREEN_MIN_WIDTH = 2
 SCREEN_MAX_WIDTH = 1280
-SCREEN_MIN_HEIGHT = 0
+SCREEN_MIN_HEIGHT = 2
 SCREEN_MAX_HEIGHT = 720
 
 pygame.display.set_caption("Zookeeper")
@@ -53,17 +53,16 @@ class Animal:
         self.movement_speed = random.randint(0,self.movement_speed+1)
         x_direction = random.randint(-1,1)
         y_direction = random.randint(-1, 1)
+        self.animalRect.x += self.movement_speed * x_direction
+        self.animalRect.y += self.movement_speed * y_direction
         if self.animalRect.y <= SCREEN_MIN_HEIGHT:
-            self.animalRect.y = 1 + self.animalRect.y
-        elif self.animalRect.y >= SCREEN_MAX_HEIGHT - self.height:
-            self.animalRect.y = self.animalRect.y - 1
-        elif self.animalRect.x <= SCREEN_MIN_WIDTH:
-            self.animalRect.x = 1 #self.animalRect.x # Would it make more sense to make it = 1 instead 1 + animal.x?
-        elif self.animalRect.x >= SCREEN_MAX_WIDTH - self.width:
-            self.animalRect.x = self.animalRect.x - 1
-        else:
-            self.animalRect.x += self.movement_speed * x_direction
-            self.animalRect.y += self.movement_speed * y_direction
+            self.animalRect.y = 5
+        if self.animalRect.y >= SCREEN_MAX_HEIGHT - self.height:
+            self.animalRect.y = self.animalRect.y - 10
+        if self.animalRect.x <= SCREEN_MIN_WIDTH:
+            self.animalRect.x = 5
+        if self.animalRect.x >= SCREEN_MAX_WIDTH - self.width:
+            self.animalRect.x = self.animalRect.x - 10
         print(f"{self.species} Movement Logging: x: {self.animalRect.x}, y: {self.animalRect.y}, movement_speed:{self.movement_speed}")
 
 # TODO: Implement Zookeeper class
@@ -91,8 +90,9 @@ class Zookeeper:
     # TODO: Feed animal method
 
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 10)
-penguin = Animal("Penguin", 5, 5, 10, 10, "white", 3)
-
+penguin = Animal("Penguin", 4, 5, 10, 10, "white", 10)
+penguin2 = Animal("Penguin", 400, 500, 10, 10, "white", 10)
+penguin_list = [penguin, penguin2]
 
 while game_running:
     keys = pygame.key.get_pressed()
@@ -102,7 +102,8 @@ while game_running:
             pygame.quit()
             raise SystemExit
         elif event.type == penguin_move_event:
-            penguin.move()
+            for penguin in penguin_list:
+                penguin.move()
 
     # Do logical updates here.
     if keys[pygame.K_d] and zookeeper.zookeeperRect.x < SCREEN_MAX_WIDTH - zookeeper.width:
@@ -114,15 +115,12 @@ while game_running:
     if keys[pygame.K_s] and zookeeper.zookeeperRect.y < SCREEN_MAX_HEIGHT - zookeeper.height:
         zookeeper.move(0, 1)
 
-    # # NPC movement
-    # # TODO: Implement a timer for animal movement
-    # penguin.move()
-
     screen.fill(ZOO_BACKGROUND_COLOUR)  # Fill the display with a solid colour
 
     # Render the graphics here.
     zookeeper.display()
-    penguin.display()
+    for penguin in penguin_list:
+        penguin.display()
 
     pygame.display.flip()  # Refresh on-screen display
     clock.tick(60)         # wait until next frame (at 60 FPS)
