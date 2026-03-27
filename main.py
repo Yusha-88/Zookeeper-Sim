@@ -27,6 +27,9 @@ y_direction = 0
 penguin_move_event = pygame.USEREVENT + 1
 penguin_move_time_ms = random.randint(1000,5000)
 pygame.time.set_timer(penguin_move_event, penguin_move_time_ms)
+# Timed event for draining animal's hunger
+penguin_hunger_event = pygame.USEREVENT + 2
+pygame.time.set_timer(penguin_hunger_event, 30000)
 
 # TODO: Implement Animal class
 class Animal:
@@ -37,9 +40,8 @@ class Animal:
         self.height = height
         self.width = width
         self.colour = colour
-        self.health = 100
         self.movement_speed = movement_speed
-        # TODO: Implement Hunger state
+        self.hunger = 100.0
 
         self.animalRect = pygame.Rect(x_pos, y_pos, height, width)
         # Blit of animal to screen
@@ -48,12 +50,11 @@ class Animal:
     def display(self):
         self.animalRect = pygame.draw.rect(screen,self.colour, self.animalRect)
 
-    # TODO: Move method
     def move(self):
         self.movement_speed = random.randint(0,self.movement_speed+1)
         x_direction = random.randint(-1,1)
         y_direction = random.randint(-1, 1)
-        self.animalRect.x += self.movement_speed * x_direction
+        self.animalRect.x += self.movement_speed * 1
         self.animalRect.y += self.movement_speed * y_direction
         if self.animalRect.y <= SCREEN_MIN_HEIGHT:
             self.animalRect.y = 5
@@ -64,6 +65,11 @@ class Animal:
         if self.animalRect.x >= SCREEN_MAX_WIDTH - self.width:
             self.animalRect.x = self.animalRect.x - 10
         print(f"{self.species} Movement Logging: x: {self.animalRect.x}, y: {self.animalRect.y}, movement_speed:{self.movement_speed}")
+
+    def drain_hunger(self):
+        if self.hunger > 0:
+            self.hunger = self.hunger - 10
+        print(f"{self.species} Hunger: {self.hunger}")
 
 # TODO: Implement Zookeeper class
 class Zookeeper:
@@ -91,7 +97,7 @@ class Zookeeper:
 
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 10)
 penguin = Animal("Penguin", 4, 5, 10, 10, "white", 10)
-penguin2 = Animal("Penguin", 400, 500, 10, 10, "white", 10)
+penguin2 = Animal("Penguin", 1260, 50, 10, 10, "white", 10)
 penguin_list = [penguin, penguin2]
 
 while game_running:
@@ -104,6 +110,9 @@ while game_running:
         elif event.type == penguin_move_event:
             for penguin in penguin_list:
                 penguin.move()
+        elif event.type == penguin_hunger_event:
+            for penguin in penguin_list:
+                penguin.drain_hunger()
 
     # Do logical updates here.
     if keys[pygame.K_d] and zookeeper.zookeeperRect.x < SCREEN_MAX_WIDTH - zookeeper.width:
