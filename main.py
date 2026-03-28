@@ -33,7 +33,7 @@ pygame.time.set_timer(penguin_hunger_event, 30000)
 
 # TODO: Implement Animal class
 class Animal:
-    def __init__(self, species, x_pos, y_pos, height, width, colour, movement_speed):
+    def __init__(self, species, x_pos, y_pos, height, width, colour, movement_speed, hunger=100):
         self.species = species
         self.x_pos = x_pos
         self.y_pos = y_pos
@@ -41,7 +41,9 @@ class Animal:
         self.width = width
         self.colour = colour
         self.movement_speed = movement_speed
-        self.hunger = 100.0
+        if hunger < 100:
+            raise ValueError("Hunger must be equal to or greater than 100")
+        self.hunger = hunger
 
         self.animalRect = pygame.Rect(x_pos, y_pos, height, width)
         # Blit of animal to screen
@@ -50,6 +52,7 @@ class Animal:
     def display(self):
         self.animalRect = pygame.draw.rect(screen,self.colour, self.animalRect)
 
+    # TODO: Might need to make the constants into arguments to allow for custom boundaries for different animals
     def move(self):
         self.movement_speed = random.randint(0,self.movement_speed+1)
         x_direction = random.randint(-1,1)
@@ -58,11 +61,11 @@ class Animal:
         self.animalRect.y += self.movement_speed * y_direction
         if self.animalRect.y <= SCREEN_MIN_HEIGHT:
             self.animalRect.y = 5
-        if self.animalRect.y >= SCREEN_MAX_HEIGHT - self.height:
+        if self.animalRect.y >= SCREEN_MAX_HEIGHT - self.height: # May need to change to self.width
             self.animalRect.y = self.animalRect.y - 10
         if self.animalRect.x <= SCREEN_MIN_WIDTH:
             self.animalRect.x = 5
-        if self.animalRect.x >= SCREEN_MAX_WIDTH - self.width:
+        if self.animalRect.x >= SCREEN_MAX_WIDTH - self.width: # May need to change to self.height, as Elephant NPC clipped offscreen
             self.animalRect.x = self.animalRect.x - 10
         print(f"{self.species} Movement Logging: x: {self.animalRect.x}, y: {self.animalRect.y}, movement_speed:{self.movement_speed}")
 
@@ -71,7 +74,6 @@ class Animal:
             self.hunger = self.hunger - 10
         print(f"{self.species} Hunger: {self.hunger}")
 
-# TODO: Implement Zookeeper class
 class Zookeeper:
     def __init__(self, x_pos, y_pos, height, width, colour, movement_speed):
         self.x_pos = x_pos
@@ -97,8 +99,8 @@ class Zookeeper:
 
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 10)
 penguin = Animal("Penguin", 4, 5, 10, 10, "white", 10)
-penguin2 = Animal("Penguin", 1260, 50, 10, 10, "white", 10)
-penguin_list = [penguin, penguin2]
+elephant = Animal("Elephant", 50, 50, 40, 10, "grey", 10, 100)
+current_animals_in_game = [penguin, elephant]
 
 while game_running:
     keys = pygame.key.get_pressed()
@@ -108,11 +110,11 @@ while game_running:
             pygame.quit()
             raise SystemExit
         elif event.type == penguin_move_event:
-            for penguin in penguin_list:
-                penguin.move()
+            for animal in current_animals_in_game:
+                animal.move()
         elif event.type == penguin_hunger_event:
-            for penguin in penguin_list:
-                penguin.drain_hunger()
+            for animal in current_animals_in_game:
+                animal.drain_hunger()
 
     # Do logical updates here.
     if keys[pygame.K_d] and zookeeper.zookeeperRect.x < SCREEN_MAX_WIDTH - zookeeper.width:
@@ -128,8 +130,8 @@ while game_running:
 
     # Render the graphics here.
     zookeeper.display()
-    for penguin in penguin_list:
-        penguin.display()
+    for animal in current_animals_in_game:
+        animal.display()
 
     pygame.display.flip()  # Refresh on-screen display
     clock.tick(60)         # wait until next frame (at 60 FPS)
