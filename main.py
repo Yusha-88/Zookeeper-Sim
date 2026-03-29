@@ -57,15 +57,15 @@ class Animal:
         self.movement_speed = random.randint(0,self.movement_speed+1)
         x_direction = random.randint(-1,1)
         y_direction = random.randint(-1, 1)
-        self.animalRect.x += self.movement_speed * 1
+        self.animalRect.x += self.movement_speed * x_direction
         self.animalRect.y += self.movement_speed * y_direction
         if self.animalRect.y <= SCREEN_MIN_HEIGHT:
             self.animalRect.y = 5
-        if self.animalRect.y >= SCREEN_MAX_HEIGHT - self.height: # May need to change to self.width
+        if self.animalRect.y >= SCREEN_MAX_HEIGHT - self.width:
             self.animalRect.y = self.animalRect.y - 10
         if self.animalRect.x <= SCREEN_MIN_WIDTH:
             self.animalRect.x = 5
-        if self.animalRect.x >= SCREEN_MAX_WIDTH - self.width: # May need to change to self.height, as Elephant NPC clipped offscreen
+        if self.animalRect.x >= SCREEN_MAX_WIDTH - self.height:
             self.animalRect.x = self.animalRect.x - 10
         print(f"{self.species} Movement Logging: x: {self.animalRect.x}, y: {self.animalRect.y}, movement_speed:{self.movement_speed}")
 
@@ -98,8 +98,8 @@ class Zookeeper:
     # TODO: Feed animal method
 
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 10)
-penguin = Animal("Penguin", 4, 5, 10, 10, "white", 10)
-elephant = Animal("Elephant", 50, 50, 40, 10, "grey", 10, 100)
+penguin = Animal("Penguin", 4, 700, 10, 10, "white", 10)
+elephant = Animal("Elephant", 550, 700, 40, 10, "grey", 10, 400)
 current_animals_in_game = [penguin, elephant]
 
 while game_running:
