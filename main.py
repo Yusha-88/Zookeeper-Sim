@@ -29,7 +29,7 @@ penguin_move_time_ms = random.randint(1000,5000)
 pygame.time.set_timer(penguin_move_event, penguin_move_time_ms)
 # Timed event for draining animal's hunger
 penguin_hunger_event = pygame.USEREVENT + 2
-pygame.time.set_timer(penguin_hunger_event, 30000)
+pygame.time.set_timer(penguin_hunger_event, 15000) #Change back to 30000
 
 # TODO: Implement Animal class
 class Animal:
@@ -41,20 +41,24 @@ class Animal:
         self.width = width
         self.colour = colour
         self.movement_speed = movement_speed
+        self.starting_movement_speed = movement_speed
         if hunger < 100:
             raise ValueError("Hunger must be equal to or greater than 100")
         self.hunger = hunger
+        self.starting_hunger = hunger # Used to compare in-game hunger level to the original via react_to_hunger
+        #TODO: Create alive attribute and set to true
 
         self.animalRect = pygame.Rect(x_pos, y_pos, height, width)
         # Blit of animal to screen
         self.animalRect = pygame.draw.rect(screen, self.colour, self.animalRect)
+
 
     def display(self):
         self.animalRect = pygame.draw.rect(screen,self.colour, self.animalRect)
 
     # TODO: Might need to make the constants into arguments to allow for custom boundaries for different animals
     def move(self):
-        self.movement_speed = random.randint(0,self.movement_speed+1)
+        self.movement_speed = random.randint(0,self.starting_movement_speed+1)
         x_direction = random.randint(-1,1)
         y_direction = random.randint(-1, 1)
         self.animalRect.x += self.movement_speed * x_direction
@@ -73,6 +77,17 @@ class Animal:
         if self.hunger > 0:
             self.hunger = self.hunger - 10
         print(f"{self.species} Hunger: {self.hunger}")
+
+
+    def react_to_hunger(self):
+        if self.hunger == (self.starting_hunger * 0.5):
+            self.starting_movement_speed = int(self.starting_movement_speed * 0.75)
+            print(f"{self.species} is hungry! Movement speed: {self.starting_movement_speed}")
+        elif self.hunger == (self.starting_hunger * 0.2):
+            self.starting_movement_speed = int(self.starting_movement_speed * 0.50)
+            print(f"{self.species} is starving! Movement speed: {self.starting_movement_speed}")
+        #TODO: Set alive state to false
+
 
 class Zookeeper:
     def __init__(self, x_pos, y_pos, height, width, colour, movement_speed):
@@ -98,8 +113,8 @@ class Zookeeper:
     # TODO: Feed animal method
 
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 10)
-penguin = Animal("Penguin", 4, 700, 10, 10, "white", 10)
-elephant = Animal("Elephant", 550, 700, 40, 10, "grey", 10, 400)
+penguin = Animal("Penguin", 4, 700, 10, 10, "white", 5)
+elephant = Animal("Elephant", 550, 700, 40, 10, "grey", 5, 400)
 current_animals_in_game = [penguin, elephant]
 
 while game_running:
@@ -115,7 +130,7 @@ while game_running:
         elif event.type == penguin_hunger_event:
             for animal in current_animals_in_game:
                 animal.drain_hunger()
-
+                animal.react_to_hunger()
     # Do logical updates here.
     if keys[pygame.K_d] and zookeeper.zookeeperRect.x < SCREEN_MAX_WIDTH - zookeeper.width:
         zookeeper.move(1, 0)
