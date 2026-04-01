@@ -29,7 +29,7 @@ penguin_move_time_ms = random.randint(1000,5000)
 pygame.time.set_timer(penguin_move_event, penguin_move_time_ms)
 # Timed event for draining animal's hunger
 penguin_hunger_event = pygame.USEREVENT + 2
-pygame.time.set_timer(penguin_hunger_event, 15000) #Change back to 30000
+pygame.time.set_timer(penguin_hunger_event, 5000) #Change back to 30000
 
 # TODO: Implement Animal class
 class Animal:
@@ -46,7 +46,7 @@ class Animal:
             raise ValueError("Hunger must be equal to or greater than 100")
         self.hunger = hunger
         self.starting_hunger = hunger # Used to compare in-game hunger level to the original via react_to_hunger
-        #TODO: Create alive attribute and set to true
+        self.alive = True
 
         self.animalRect = pygame.Rect(x_pos, y_pos, height, width)
         # Blit of animal to screen
@@ -58,19 +58,20 @@ class Animal:
 
     # TODO: Might need to make the constants into arguments to allow for custom boundaries for different animals
     def move(self):
-        self.movement_speed = random.randint(0,self.starting_movement_speed+1)
-        x_direction = random.randint(-1,1)
-        y_direction = random.randint(-1, 1)
-        self.animalRect.x += self.movement_speed * x_direction
-        self.animalRect.y += self.movement_speed * y_direction
-        if self.animalRect.y <= SCREEN_MIN_HEIGHT:
-            self.animalRect.y = 5
-        if self.animalRect.y >= SCREEN_MAX_HEIGHT - self.width:
-            self.animalRect.y = self.animalRect.y - 10
-        if self.animalRect.x <= SCREEN_MIN_WIDTH:
-            self.animalRect.x = 5
-        if self.animalRect.x >= SCREEN_MAX_WIDTH - self.height:
-            self.animalRect.x = self.animalRect.x - 10
+        if self.alive:
+            self.movement_speed = random.randint(0,self.starting_movement_speed+1)
+            x_direction = random.randint(-1,1)
+            y_direction = random.randint(-1, 1)
+            self.animalRect.x += self.movement_speed * x_direction
+            self.animalRect.y += self.movement_speed * y_direction
+            if self.animalRect.y <= SCREEN_MIN_HEIGHT:
+                self.animalRect.y = 5
+            if self.animalRect.y >= SCREEN_MAX_HEIGHT - self.width:
+                self.animalRect.y = self.animalRect.y - 10
+            if self.animalRect.x <= SCREEN_MIN_WIDTH:
+                self.animalRect.x = 5
+            if self.animalRect.x >= SCREEN_MAX_WIDTH - self.height:
+                self.animalRect.x = self.animalRect.x - 10
         print(f"{self.species} Movement Logging: x: {self.animalRect.x}, y: {self.animalRect.y}, movement_speed:{self.movement_speed}")
 
     def drain_hunger(self):
@@ -78,16 +79,18 @@ class Animal:
             self.hunger = self.hunger - 10
         print(f"{self.species} Hunger: {self.hunger}")
 
-
     def react_to_hunger(self):
-        if self.hunger == (self.starting_hunger * 0.5):
-            self.starting_movement_speed = int(self.starting_movement_speed * 0.75)
-            print(f"{self.species} is hungry! Movement speed: {self.starting_movement_speed}")
-        elif self.hunger == (self.starting_hunger * 0.2):
-            self.starting_movement_speed = int(self.starting_movement_speed * 0.50)
-            print(f"{self.species} is starving! Movement speed: {self.starting_movement_speed}")
-        #TODO: Set alive state to false
-
+        if self.alive:
+            if self.hunger == (self.starting_hunger * 0.5):
+                self.starting_movement_speed = int(self.starting_movement_speed * 0.75)
+                print(f"{self.species} is hungry! Movement speed: {self.starting_movement_speed}")
+            elif self.hunger == (self.starting_hunger * 0.2):
+                self.starting_movement_speed = int(self.starting_movement_speed * 0.50)
+                print(f"{self.species} is starving! Movement speed: {self.starting_movement_speed}")
+            elif self.hunger == 0:
+                self.alive = False
+                self.colour = "Black"
+                print(f"{self.species} has died of starvation!")
 
 class Zookeeper:
     def __init__(self, x_pos, y_pos, height, width, colour, movement_speed):
