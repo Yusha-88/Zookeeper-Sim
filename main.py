@@ -24,8 +24,8 @@ x_direction = 0
 y_direction = 0
 
 # Sounds and music
-penguin_squeak = pygame.mixer.Sound('penguin_squeak.wav')
-elephant_sound = pygame.mixer.Sound('elephant_sound.mp3')
+penguin_squeak = pygame.mixer.Sound('sounds/penguin_squeak.wav')
+elephant_sound = pygame.mixer.Sound('sounds/elephant_sound.mp3')
 penguin_sounds = [penguin_squeak]
 elephant_sounds = [elephant_sound]
 
