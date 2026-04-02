@@ -23,6 +23,12 @@ ZOOKEEPER_STARTING_Y_POS = 30
 x_direction = 0
 y_direction = 0
 
+# Sounds and music
+penguin_squeak = pygame.mixer.Sound('penguin_squeak.wav')
+elephant_sound = pygame.mixer.Sound('elephant_sound.mp3')
+penguin_sounds = [penguin_squeak]
+elephant_sounds = [elephant_sound]
+
 # Creating timed events of Pygame's queue
 penguin_move_event = pygame.USEREVENT + 1
 penguin_move_time_ms = random.randint(1000,5000)
@@ -33,7 +39,7 @@ pygame.time.set_timer(penguin_hunger_event, 5000) #Change back to 30000
 
 # TODO: Implement Animal class
 class Animal:
-    def __init__(self, species, x_pos, y_pos, height, width, colour, movement_speed, hunger=100):
+    def __init__(self, species, x_pos, y_pos, height, width, colour, movement_speed, sounds, hunger=100):
         self.species = species
         self.x_pos = x_pos
         self.y_pos = y_pos
@@ -42,6 +48,7 @@ class Animal:
         self.colour = colour
         self.movement_speed = movement_speed
         self.starting_movement_speed = movement_speed
+        self.sounds = sounds
         if hunger < 100:
             raise ValueError("Hunger must be equal to or greater than 100")
         self.hunger = hunger
@@ -83,14 +90,23 @@ class Animal:
         if self.alive:
             if self.hunger == (self.starting_hunger * 0.5):
                 self.starting_movement_speed = int(self.starting_movement_speed * 0.75)
+                self.ask_for_food()
                 print(f"{self.species} is hungry! Movement speed: {self.starting_movement_speed}")
             elif self.hunger == (self.starting_hunger * 0.2):
                 self.starting_movement_speed = int(self.starting_movement_speed * 0.50)
                 print(f"{self.species} is starving! Movement speed: {self.starting_movement_speed}")
+                self.cry_for_food()
             elif self.hunger == 0:
                 self.alive = False
                 self.colour = "Black"
                 print(f"{self.species} has died of starvation!")
+
+    def ask_for_food(self):
+        pygame.mixer.Sound.play(self.sounds[0])
+
+    def cry_for_food(self):
+        loop_no = random.randint(1,3)
+        pygame.mixer.Sound.play(self.sounds[0], loop_no)
 
 class Zookeeper:
     def __init__(self, x_pos, y_pos, height, width, colour, movement_speed):
@@ -116,8 +132,8 @@ class Zookeeper:
     # TODO: Feed animal method
 
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 10)
-penguin = Animal("Penguin", 4, 700, 10, 10, "white", 5)
-elephant = Animal("Elephant", 550, 700, 40, 10, "grey", 5, 400)
+penguin = Animal("Penguin", 4, 700, 10, 10, "white", 5,penguin_sounds)
+elephant = Animal("Elephant", 550, 700, 40, 10, "grey", 5, elephant_sounds, 200)
 current_animals_in_game = [penguin, elephant]
 
 while game_running:
