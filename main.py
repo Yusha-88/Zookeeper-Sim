@@ -5,7 +5,7 @@ import time
 pygame.init()
 
 screen = pygame.display.set_mode((1280,720))
-SCREEN_MIN_WIDTH = 2
+SCREEN_MIN_WIDTH = 0
 SCREEN_MAX_WIDTH = 1280
 SCREEN_MIN_HEIGHT = 2
 SCREEN_MAX_HEIGHT = 720
@@ -43,6 +43,8 @@ class Animal:
         self.species = species
         self.x_pos = x_pos
         self.y_pos = y_pos
+        self.x_direction = 0
+        self.y_direction = 0
         self.height = height
         self.width = width
         self.colour = colour
@@ -52,7 +54,7 @@ class Animal:
         if hunger < 100:
             raise ValueError("Hunger must be equal to or greater than 100")
         self.hunger = hunger
-        self.starting_hunger = hunger # Used to compare in-game hunger level to the original via react_to_hunger
+        self.starting_hunger = hunger # Used to compare in-game hunger level to it's initial level via react_to_hunger
         self.alive = True
 
         self.animalRect = pygame.Rect(x_pos, y_pos, height, width)
@@ -71,6 +73,7 @@ class Animal:
             y_direction = random.randint(-1, 1)
             self.animalRect.x += self.movement_speed * x_direction
             self.animalRect.y += self.movement_speed * y_direction
+            #TODO: I can make the lines below into a separate function
             if self.animalRect.y <= SCREEN_MIN_HEIGHT:
                 self.animalRect.y = 5
             if self.animalRect.y >= SCREEN_MAX_HEIGHT - self.width:
@@ -79,12 +82,12 @@ class Animal:
                 self.animalRect.x = 5
             if self.animalRect.x >= SCREEN_MAX_WIDTH - self.height:
                 self.animalRect.x = self.animalRect.x - 10
-        print(f"{self.species} Movement Logging: x: {self.animalRect.x}, y: {self.animalRect.y}, movement_speed:{self.movement_speed}")
+            print(f"{self.species} Movement Logging: x: {self.animalRect.x}, y: {self.animalRect.y}, movement_speed:{self.movement_speed}")
 
     def drain_hunger(self):
         if self.hunger > 0:
             self.hunger = self.hunger - 10
-        print(f"{self.species} Hunger: {self.hunger}")
+            print(f"{self.species} Hunger: {self.hunger}")
 
     def react_to_hunger(self):
         if self.alive:
@@ -128,12 +131,24 @@ class Zookeeper:
     def move(self, x_direction, y_direction):
         self.zookeeperRect.x += self.movement_speed * x_direction
         self.zookeeperRect.y += self.movement_speed * y_direction
+        print(f"Zookeeper x-position: {self.zookeeperRect.x}, y_position: {self.zookeeperRect.y}, right: {self.zookeeperRect.right}, height: {self.zookeeperRect.width}, width: {self.zookeeperRect.height}")
+
+    def collide(self, animal):
+        # Horizontal collision
+        if (self.zookeeperRect.right - animal.animalRect.left) < (self.zookeeperRect.bottom - animal.animalRect.top):
+            self.zookeeperRect.right = animal.animalRect.left
+        elif (animal.animalRect.right - self.zookeeperRect.left) < (self.zookeeperRect.bottom - animal.animalRect.top):
+            self.zookeeperRect.left = animal.animalRect.right
+        elif animal.animalRect.top < self.zookeeperRect.bottom < animal.animalRect.bottom:
+            self.zookeeperRect.bottom = animal.animalRect.top
+        elif animal.animalRect.top < self.zookeeperRect.top < animal.animalRect.bottom and self.zookeeperRect.bottom > animal.animalRect.top:
+            self.zookeeperRect.top = animal.animalRect.bottom
 
     # TODO: Feed animal method
 
-zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 10)
-penguin = Animal("Penguin", 4, 700, 10, 10, "white", 5,penguin_sounds)
-elephant = Animal("Elephant", 550, 700, 40, 10, "grey", 5, elephant_sounds, 200)
+zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 5)
+penguin = Animal("Penguin", 10, 10, 10, 10, "white", 5,penguin_sounds, 800)
+elephant = Animal("Elephant", 1220, 680, 40, 10, "grey", 5, elephant_sounds, 200)
 current_animals_in_game = [penguin, elephant]
 
 while game_running:
@@ -150,7 +165,16 @@ while game_running:
             for animal in current_animals_in_game:
                 animal.drain_hunger()
                 animal.react_to_hunger()
-    # Do logical updates here.
+
+    # for animal in current_animals_in_game:
+    #     if zookeeper.zookeeperRect.collidelist(animal.animalRect):
+    #         zookeeper.collide(zookeeper.zookeeperRect.x, zookeeper.zookeeperRect.y)
+
+    # # Do logical updates here.
+    if zookeeper.zookeeperRect.colliderect(penguin.animalRect):
+        zookeeper.collide(penguin)
+    if zookeeper.zookeeperRect.colliderect(elephant.animalRect):
+        zookeeper.collide(elephant)
     if keys[pygame.K_d] and zookeeper.zookeeperRect.x < SCREEN_MAX_WIDTH - zookeeper.width:
         zookeeper.move(1, 0)
     if keys[pygame.K_a] and zookeeper.zookeeperRect.x > SCREEN_MIN_WIDTH:
@@ -159,6 +183,17 @@ while game_running:
         zookeeper.move(0, -1)
     if keys[pygame.K_s] and zookeeper.zookeeperRect.y < SCREEN_MAX_HEIGHT - zookeeper.height:
         zookeeper.move(0, 1)
+
+    # TODO: Make this into a function
+    if zookeeper.zookeeperRect.x <= SCREEN_MIN_WIDTH:
+        zookeeper.zookeeperRect.x = SCREEN_MIN_WIDTH
+    if zookeeper.zookeeperRect.x >= SCREEN_MAX_WIDTH - zookeeper.zookeeperRect.height:
+        zookeeper.zookeeperRect.x = SCREEN_MAX_WIDTH - zookeeper.zookeeperRect.height
+    if zookeeper.zookeeperRect.y <= SCREEN_MIN_HEIGHT:
+        zookeeper.zookeeperRect.y = SCREEN_MIN_HEIGHT
+    if zookeeper.zookeeperRect.y >= SCREEN_MAX_HEIGHT - zookeeper.zookeeperRect.width:
+        zookeeper.zookeeperRect.y = SCREEN_MAX_HEIGHT - zookeeper.zookeeperRect.width
+
 
     screen.fill(ZOO_BACKGROUND_COLOUR)  # Fill the display with a solid colour
 
