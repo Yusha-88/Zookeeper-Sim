@@ -26,6 +26,7 @@ y_direction = 0
 # Sounds and music
 penguin_squeak = pygame.mixer.Sound('sounds/penguin_squeak.wav')
 elephant_sound = pygame.mixer.Sound('sounds/elephant_sound.mp3')
+eating_sound = pygame.mixer.Sound('sounds/eating_sound.wav')
 penguin_sounds = [penguin_squeak]
 elephant_sounds = [elephant_sound]
 
@@ -111,6 +112,12 @@ class Animal:
         loop_no = random.randint(1,3)
         pygame.mixer.Sound.play(self.sounds[0], loop_no)
 
+    def eat_food(self):
+        if self.hunger < self.starting_hunger:
+            self.hunger = self.starting_hunger
+            pygame.mixer.Sound.play(eating_sound)
+            print(f"{self.species} hunger level: {self.hunger}. {self.species} fed!")
+
 class Zookeeper:
     def __init__(self, x_pos, y_pos, height, width, colour, movement_speed):
         self.x_pos = x_pos
@@ -131,10 +138,9 @@ class Zookeeper:
     def move(self, x_direction, y_direction):
         self.zookeeperRect.x += self.movement_speed * x_direction
         self.zookeeperRect.y += self.movement_speed * y_direction
-        print(f"Zookeeper x-position: {self.zookeeperRect.x}, y_position: {self.zookeeperRect.y}, right: {self.zookeeperRect.right}, height: {self.zookeeperRect.width}, width: {self.zookeeperRect.height}")
+        # print(f"Zookeeper x-position: {self.zookeeperRect.x}, y_position: {self.zookeeperRect.y}, right: {self.zookeeperRect.right}, height: {self.zookeeperRect.width}, width: {self.zookeeperRect.height}")
 
     def collide(self, animal):
-        # Horizontal collision
         if (self.zookeeperRect.right - animal.animalRect.left) < (self.zookeeperRect.bottom - animal.animalRect.top):
             self.zookeeperRect.right = animal.animalRect.left
         elif (animal.animalRect.right - self.zookeeperRect.left) < (self.zookeeperRect.bottom - animal.animalRect.top):
@@ -143,8 +149,6 @@ class Zookeeper:
             self.zookeeperRect.bottom = animal.animalRect.top
         elif animal.animalRect.top < self.zookeeperRect.top < animal.animalRect.bottom and self.zookeeperRect.bottom > animal.animalRect.top:
             self.zookeeperRect.top = animal.animalRect.bottom
-
-    # TODO: Feed animal method
 
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 5)
 penguin = Animal("Penguin", 10, 10, 10, 10, "white", 5,penguin_sounds, 800)
@@ -173,8 +177,12 @@ while game_running:
     # # Do logical updates here.
     if zookeeper.zookeeperRect.colliderect(penguin.animalRect):
         zookeeper.collide(penguin)
+        if keys[pygame.K_e]:
+            penguin.eat_food()
     if zookeeper.zookeeperRect.colliderect(elephant.animalRect):
         zookeeper.collide(elephant)
+        if keys[pygame.K_e]:
+            elephant.eat_food()
     if keys[pygame.K_d] and zookeeper.zookeeperRect.x < SCREEN_MAX_WIDTH - zookeeper.width:
         zookeeper.move(1, 0)
     if keys[pygame.K_a] and zookeeper.zookeeperRect.x > SCREEN_MIN_WIDTH:
@@ -193,7 +201,6 @@ while game_running:
         zookeeper.zookeeperRect.y = SCREEN_MIN_HEIGHT
     if zookeeper.zookeeperRect.y >= SCREEN_MAX_HEIGHT - zookeeper.zookeeperRect.width:
         zookeeper.zookeeperRect.y = SCREEN_MAX_HEIGHT - zookeeper.zookeeperRect.width
-
 
     screen.fill(ZOO_BACKGROUND_COLOUR)  # Fill the display with a solid colour
 
