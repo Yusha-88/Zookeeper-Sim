@@ -1,5 +1,9 @@
 Change log
 
+22/04/26 - Moved logic that stops Zookeeper from leaving the screen after colliding with Animal to a function.
+
+21/04/26 - Zookeeper no longer has to be colliding into Animal to feed it. Animals can only eat when their health falls below 70%.
+
 19/04/26 - Zookeeper player can now feed Animal NPCs, restoring their health.
 
 18/04/26 - Added collision between the player zookeeper and the animal NPCs.

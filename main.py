@@ -2,6 +2,8 @@ import pygame
 import random
 import time
 
+from pygame.math import Vector2
+
 pygame.init()
 
 screen = pygame.display.set_mode((1280,720))
@@ -62,7 +64,6 @@ class Animal:
         # Blit of animal to screen
         self.animalRect = pygame.draw.rect(screen, self.colour, self.animalRect)
 
-
     def display(self):
         self.animalRect = pygame.draw.rect(screen,self.colour, self.animalRect)
 
@@ -113,10 +114,12 @@ class Animal:
         pygame.mixer.Sound.play(self.sounds[0], loop_no)
 
     def eat_food(self):
-        if self.hunger < self.starting_hunger:
+        if self.hunger < (self.starting_hunger * 0.7):
             self.hunger = self.starting_hunger
             pygame.mixer.Sound.play(eating_sound)
             print(f"{self.species} hunger level: {self.hunger}. {self.species} fed!")
+        else:
+            print(f"{self.species} is full!")
 
 class Zookeeper:
     def __init__(self, x_pos, y_pos, height, width, colour, movement_speed):
@@ -150,6 +153,23 @@ class Zookeeper:
         elif animal.animalRect.top < self.zookeeperRect.top < animal.animalRect.bottom and self.zookeeperRect.bottom > animal.animalRect.top:
             self.zookeeperRect.top = animal.animalRect.bottom
 
+    def check_boundary(self, min_width, max_width, min_height, max_height):
+        if self.zookeeperRect.x <= min_width:
+            self.zookeeperRect.x = min_width
+        if self.zookeeperRect.x >= max_width - self.zookeeperRect.height:
+            self.zookeeperRect.x = max_width - self.zookeeperRect.height
+        if self.zookeeperRect.y <= min_height:
+            self.zookeeperRect.y = min_height
+        if self.zookeeperRect.y >= max_height - self.zookeeperRect.width:
+            self.zookeeperRect.y = max_height - self.zookeeperRect.width
+
+    def feed(self, animal):
+        distance_to_animal = Vector2(self.zookeeperRect.center).distance_to(animal.animalRect.center)
+        if distance_to_animal < 40:
+            return True
+        else:
+            return False
+
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 5)
 penguin = Animal("Penguin", 10, 10, 10, 10, "white", 5,penguin_sounds, 800)
 elephant = Animal("Elephant", 1220, 680, 40, 10, "grey", 5, elephant_sounds, 200)
@@ -170,10 +190,6 @@ while game_running:
                 animal.drain_hunger()
                 animal.react_to_hunger()
 
-    # for animal in current_animals_in_game:
-    #     if zookeeper.zookeeperRect.collidelist(animal.animalRect):
-    #         zookeeper.collide(zookeeper.zookeeperRect.x, zookeeper.zookeeperRect.y)
-
     # # Do logical updates here.
     if zookeeper.zookeeperRect.colliderect(penguin.animalRect):
         zookeeper.collide(penguin)
@@ -191,16 +207,8 @@ while game_running:
         zookeeper.move(0, -1)
     if keys[pygame.K_s] and zookeeper.zookeeperRect.y < SCREEN_MAX_HEIGHT - zookeeper.height:
         zookeeper.move(0, 1)
-
-    # TODO: Make this into a function
-    if zookeeper.zookeeperRect.x <= SCREEN_MIN_WIDTH:
-        zookeeper.zookeeperRect.x = SCREEN_MIN_WIDTH
-    if zookeeper.zookeeperRect.x >= SCREEN_MAX_WIDTH - zookeeper.zookeeperRect.height:
-        zookeeper.zookeeperRect.x = SCREEN_MAX_WIDTH - zookeeper.zookeeperRect.height
-    if zookeeper.zookeeperRect.y <= SCREEN_MIN_HEIGHT:
-        zookeeper.zookeeperRect.y = SCREEN_MIN_HEIGHT
-    if zookeeper.zookeeperRect.y >= SCREEN_MAX_HEIGHT - zookeeper.zookeeperRect.width:
-        zookeeper.zookeeperRect.y = SCREEN_MAX_HEIGHT - zookeeper.zookeeperRect.width
+    # This stops zookeeper from leaving boundary when colliding with animal
+    zookeeper.check_boundary(SCREEN_MIN_WIDTH, SCREEN_MAX_WIDTH, SCREEN_MIN_HEIGHT, SCREEN_MAX_HEIGHT)
 
     screen.fill(ZOO_BACKGROUND_COLOUR)  # Fill the display with a solid colour
 
@@ -208,6 +216,8 @@ while game_running:
     zookeeper.display()
     for animal in current_animals_in_game:
         animal.display()
+        if zookeeper.feed(animal) and keys[pygame.K_e]:
+            animal.eat_food()
 
     pygame.display.flip()  # Refresh on-screen display
     clock.tick(60)         # wait until next frame (at 60 FPS)
