@@ -1,5 +1,7 @@
 Change log
 
+5/05/26 - Zookeeper now has a placeholder sprite with idle and walking animations
+
 22/04/26 - Moved logic that stops Zookeeper from leaving the screen after colliding with Animal to a function.
 
 21/04/26 - Zookeeper no longer has to be colliding into Animal to feed it. Animals can only eat when their health falls below 70%.

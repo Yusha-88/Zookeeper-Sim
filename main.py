@@ -24,6 +24,7 @@ ZOOKEEPER_STARTING_X_POS = 30
 ZOOKEEPER_STARTING_Y_POS = 30
 x_direction = 0
 y_direction = 0
+flip_image = False
 
 # Sounds and music
 penguin_squeak = pygame.mixer.Sound('sounds/penguin_squeak.wav')
@@ -59,11 +60,8 @@ class Animal:
         self.hunger = hunger
         self.starting_hunger = hunger # Used to compare in-game hunger level to it's initial level via react_to_hunger
         self.alive = True
-
         self.animalRect = pygame.Rect(x_pos, y_pos, height, width)
-        # Blit of animal to screen
-        self.animalRect = pygame.draw.rect(screen, self.colour, self.animalRect)
-
+    # I might need to display the spritesheet in this function
     def display(self):
         self.animalRect = pygame.draw.rect(screen,self.colour, self.animalRect)
 
@@ -121,23 +119,30 @@ class Animal:
         else:
             print(f"{self.species} is full!")
 
-class Zookeeper:
+class Zookeeper(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, height, width, colour, movement_speed):
+        super().__init__()
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.height = height
         self.width = width
         self.colour = colour
         self.movement_speed = movement_speed
-
+        self.zookeeper_sprite_sheet = pygame.image.load("images/DinoSprites.png").convert_alpha()
+        self.image = ''
         # Rect of the zookeeper
         self.zookeeperRect = pygame.Rect(x_pos,y_pos, height, width)
-        # Blit of zookeeper to screen
-        self.zookeeperRect = pygame.draw.rect(screen, self.colour, self.zookeeperRect)
 
-    def display(self):
-        self.zookeeperRect = pygame.draw.rect(screen, self.colour, self.zookeeperRect)
+    # I might need to display the spritesheet in this function
+    def display(self, frame):
+        # self.zookeeperRect = pygame.draw.rect(screen, self.colour, self.zookeeperRect)
+        scale = 3
+        self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA).convert_alpha()
+        self.image.blit(self.zookeeper_sprite_sheet, (0, 0), (self.width * frame, 0, self.width, self.height))
+        self.image = pygame.transform.scale(self.image, (self.width * scale, self.height * scale))
+        return self.image
 
+    # TODO: Add animations for sprites here
     def move(self, x_direction, y_direction):
         self.zookeeperRect.x += self.movement_speed * x_direction
         self.zookeeperRect.y += self.movement_speed * y_direction
@@ -170,10 +175,30 @@ class Zookeeper:
         else:
             return False
 
-zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 20, 20, "white", 5)
+zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 24, 24, "white", 5)
 penguin = Animal("Penguin", 10, 10, 10, 10, "white", 5,penguin_sounds, 800)
 elephant = Animal("Elephant", 1220, 680, 40, 10, "grey", 5, elephant_sounds, 200)
 current_animals_in_game = [penguin, elephant]
+
+# Create animation list
+animation_list = []
+animation_step = [4,6]
+action = 0 # This picks a set of animation from animation list
+previous_action = action
+step_counter = 0 # Used to iterate through the nested animation for loop
+last_update = pygame.time.get_ticks()
+cooldown = 100
+frame = 0
+current_zookeeper_image = ""
+previous_key = ""
+
+# Add first four images in sheet to animation list for an idle animation
+for animation in animation_step:
+    temp_img_list = []
+    for _ in range(animation):
+        temp_img_list.append(zookeeper.display(step_counter))
+        step_counter += 1
+    animation_list.append(temp_img_list)
 
 while game_running:
     keys = pygame.key.get_pressed()
@@ -191,6 +216,7 @@ while game_running:
                 animal.react_to_hunger()
 
     # # Do logical updates here.
+    action = 0 # Reset action to stop infinite animation loop
     if zookeeper.zookeeperRect.colliderect(penguin.animalRect):
         zookeeper.collide(penguin)
         if keys[pygame.K_e]:
@@ -199,21 +225,50 @@ while game_running:
         zookeeper.collide(elephant)
         if keys[pygame.K_e]:
             elephant.eat_food()
-    if keys[pygame.K_d] and zookeeper.zookeeperRect.x < SCREEN_MAX_WIDTH - zookeeper.width:
+    if keys[pygame.K_d]:
         zookeeper.move(1, 0)
-    if keys[pygame.K_a] and zookeeper.zookeeperRect.x > SCREEN_MIN_WIDTH:
+        action = 1
+        previous_key = "d"
+    if keys[pygame.K_a]: #and zookeeper.zookeeperRect.x > SCREEN_MIN_WIDTH:
         zookeeper.move(-1, 0)
+        action = 1
+        previous_key = "a"
     if keys[pygame.K_w] and zookeeper.zookeeperRect.y > SCREEN_MIN_HEIGHT:
         zookeeper.move(0, -1)
+        action = 1
     if keys[pygame.K_s] and zookeeper.zookeeperRect.y < SCREEN_MAX_HEIGHT - zookeeper.height:
         zookeeper.move(0, 1)
+        action = 1
+
+    # Reset frame to stop it from starting mid-iteration and going out of bounds
+    if action != previous_action:
+        frame = 0
+        previous_action = action
+
     # This stops zookeeper from leaving boundary when colliding with animal
     zookeeper.check_boundary(SCREEN_MIN_WIDTH, SCREEN_MAX_WIDTH, SCREEN_MIN_HEIGHT, SCREEN_MAX_HEIGHT)
 
     screen.fill(ZOO_BACKGROUND_COLOUR)  # Fill the display with a solid colour
 
-    # Render the graphics here.
-    zookeeper.display()
+    # Update animation
+    current_time = pygame.time.get_ticks()
+    if current_time - last_update >= cooldown:
+        frame += 1
+        last_update = current_time
+        if frame >= len(animation_list[action]):
+            frame = 0
+
+    # Show zookeeper frame
+    current_zookeeper_image = animation_list[action][frame]
+    # Flip the zookeeper sprite in the direction of movement
+    if previous_key == "a":
+        current_zookeeper_image = pygame.transform.flip(current_zookeeper_image, True, False)
+    screen.blit(current_zookeeper_image, zookeeper.zookeeperRect)
+
+    # Below is for testing purposes
+    # length = len(animation_list[action])
+    # print(f"action: {action}, frame: {frame}, length: {length}")
+
     for animal in current_animals_in_game:
         animal.display()
         if zookeeper.feed(animal) and keys[pygame.K_e]:
