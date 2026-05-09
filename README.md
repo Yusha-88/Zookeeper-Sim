@@ -1,6 +1,8 @@
 Change log
 
-5/05/26 - Zookeeper now has a placeholder sprite with idle and walking animations
+9/05/26 - Animal NPCs now have placeholder sprites with idle animations.
+
+5/05/26 - Zookeeper now has a placeholder sprite with idle and walking animations.
 
 22/04/26 - Moved logic that stops Zookeeper from leaving the screen after colliding with Animal to a function.
 
