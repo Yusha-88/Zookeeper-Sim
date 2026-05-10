@@ -1,5 +1,7 @@
 Change log
 
+10/05/26 - Fixed an issue where the player can feed animals after they die. Added a death sprite for animals when they die.
+
 9/05/26 - Animal NPCs now have placeholder sprites with idle animations.
 
 5/05/26 - Zookeeper now has a placeholder sprite with idle and walking animations.
