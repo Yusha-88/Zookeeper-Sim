@@ -119,12 +119,15 @@ class Animal:
         pygame.mixer.Sound.play(self.sounds[0], loop_no)
 
     def eat_food(self):
-        if self.hunger < (self.starting_hunger * 0.7):
-            self.hunger = self.starting_hunger
-            pygame.mixer.Sound.play(eating_sound)
-            print(f"{self.species} hunger level: {self.hunger}. {self.species} fed!")
+        if self.alive:
+            if self.hunger < (self.starting_hunger * 0.7):
+                self.hunger = self.starting_hunger
+                pygame.mixer.Sound.play(eating_sound)
+                print(f"{self.species} hunger level: {self.hunger}. {self.species} fed!")
+            else:
+                print(f"{self.species} is full!")
         else:
-            print(f"{self.species} is full!")
+            print(f"{self.species} is dead.")
 
 class Zookeeper(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, height, width, colour, movement_speed):
@@ -299,8 +302,16 @@ while game_running:
     if previous_key == "a":
         current_zookeeper_image = pygame.transform.flip(current_zookeeper_image, True, False)
     screen.blit(current_zookeeper_image, zookeeper.zookeeperRect)
-    screen.blit(current_penguin_image, penguin.animalRect)
-    screen.blit(current_elephant_image, elephant.animalRect)
+    if penguin.alive:
+        screen.blit(current_penguin_image, penguin.animalRect)
+    else: # Show death sprite
+        penguin_death_sprite = pygame.transform.grayscale(animation_list_penguin[0][0])
+        screen.blit(penguin_death_sprite, penguin.animalRect)
+    if elephant.alive:
+        screen.blit(current_elephant_image, elephant.animalRect)
+    else:
+        elephant_death_sprite = pygame.transform.grayscale(animation_list_elephant[0][0])
+        screen.blit(elephant_death_sprite, elephant.animalRect)
 
     # Below is for testing purposes
     # length = len(animation_list[action])
