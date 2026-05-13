@@ -76,19 +76,21 @@ class Animal:
     def move(self):
         if self.alive:
             self.movement_speed = random.randint(0,self.starting_movement_speed+1)
-            x_direction = random.randint(-1,1)
-            y_direction = random.randint(-1, 1)
+            # x_direction = random.randint(-1,1)
+            # y_direction = random.randint(-1, 1)
+            x_direction = 0
+            y_direction = -1
             self.animalRect.x += self.movement_speed * x_direction
             self.animalRect.y += self.movement_speed * y_direction
             #TODO: I can make the lines below into a separate function
             if self.animalRect.y <= SCREEN_MIN_HEIGHT:
                 self.animalRect.y = 5
-            if self.animalRect.y >= SCREEN_MAX_HEIGHT - self.width:
-                self.animalRect.y = self.animalRect.y - 10
+            if self.animalRect.y >= SCREEN_MAX_HEIGHT - (self.width+40):
+                self.animalRect.y = SCREEN_MAX_HEIGHT - (self.width+40)
             if self.animalRect.x <= SCREEN_MIN_WIDTH:
                 self.animalRect.x = 5
-            if self.animalRect.x >= SCREEN_MAX_WIDTH - self.height:
-                self.animalRect.x = self.animalRect.x - 10
+            if self.animalRect.x >= SCREEN_MAX_WIDTH - (self.height+40):
+                self.animalRect.x = SCREEN_MAX_WIDTH - (self.height+40)
             print(f"{self.species} Movement Logging: x: {self.animalRect.x}, y: {self.animalRect.y}, movement_speed:{self.movement_speed}")
 
     def drain_hunger(self):

@@ -1,5 +1,7 @@
 Change log
 
+13/05/26 - Stopped Animal NPCs from moving off-screen. 
+
 10/05/26 - Fixed an issue where the player can feed animals after they die. Added a death sprite for animals when they die.
 
 9/05/26 - Animal NPCs now have placeholder sprites with idle animations.
