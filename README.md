@@ -1,5 +1,7 @@
 Change log
 
+13/06/26 - Moved the Animal NPCs boundary check from move() to a separate function check_boundary(). 
+
 13/05/26 - Stopped Animal NPCs from moving off-screen. 
 
 10/05/26 - Fixed an issue where the player can feed animals after they die. Added a death sprite for animals when they die.

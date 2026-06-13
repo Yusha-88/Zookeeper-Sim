@@ -41,7 +41,7 @@ pygame.time.set_timer(penguin_move_event, penguin_move_time_ms)
 penguin_hunger_event = pygame.USEREVENT + 2
 pygame.time.set_timer(penguin_hunger_event, 5000) #Change back to 30000
 
-# TODO: Implement Animal class
+
 class Animal:
     def __init__(self, species, x_pos, y_pos, height, width, colour, movement_speed, sounds, animal_sprite_sheet, hunger=100):
         self.species = species
@@ -63,7 +63,7 @@ class Animal:
         self.animalRect = pygame.Rect(x_pos, y_pos, height, width)
         self.animal_sprite_sheet = animal_sprite_sheet
         self.image = ''
-    # TODO: I need this to match the Zookeeper's display function
+
     def display(self, frame):
         # self.animalRect = pygame.draw.rect(screen,self.colour, self.animalRect)
         scale = 3
@@ -76,22 +76,24 @@ class Animal:
     def move(self):
         if self.alive:
             self.movement_speed = random.randint(0,self.starting_movement_speed+1)
-            # x_direction = random.randint(-1,1)
-            # y_direction = random.randint(-1, 1)
-            x_direction = 0
-            y_direction = -1
+            x_direction = random.randint(-1,1)
+            y_direction = random.randint(-1, 1)
+            # Comment out below to control NPCs for screen boundary testing
+            # x_direction = 1
+            # y_direction = -1
             self.animalRect.x += self.movement_speed * x_direction
             self.animalRect.y += self.movement_speed * y_direction
-            #TODO: I can make the lines below into a separate function
-            if self.animalRect.y <= SCREEN_MIN_HEIGHT:
-                self.animalRect.y = 5
-            if self.animalRect.y >= SCREEN_MAX_HEIGHT - (self.width+40):
-                self.animalRect.y = SCREEN_MAX_HEIGHT - (self.width+40)
-            if self.animalRect.x <= SCREEN_MIN_WIDTH:
-                self.animalRect.x = 5
-            if self.animalRect.x >= SCREEN_MAX_WIDTH - (self.height+40):
-                self.animalRect.x = SCREEN_MAX_WIDTH - (self.height+40)
-            print(f"{self.species} Movement Logging: x: {self.animalRect.x}, y: {self.animalRect.y}, movement_speed:{self.movement_speed}")
+
+    def check_boundary(self, min_height, max_height, min_width, max_width):
+        if self.animalRect.y <= min_height:
+            self.animalRect.y = 5
+        if self.animalRect.y >= max_height - (self.width + 40):
+            self.animalRect.y = max_height - (self.width + 40)
+        if self.animalRect.x <= min_width:
+            self.animalRect.x = 5
+        if self.animalRect.x >= max_width - (self.height + 40):
+            self.animalRect.x = max_width - (self.height + 40)
+        print(f"{self.species} Movement Logging: x: {self.animalRect.x}, y: {self.animalRect.y}, movement_speed:{self.movement_speed}")
 
     def drain_hunger(self):
         if self.hunger > 0:
@@ -145,9 +147,7 @@ class Zookeeper(pygame.sprite.Sprite):
         # Rect of the zookeeper
         self.zookeeperRect = pygame.Rect(x_pos,y_pos, height, width)
 
-    # I might need to display the spritesheet in this function
     def display(self, frame):
-        # self.zookeeperRect = pygame.draw.rect(screen, self.colour, self.zookeeperRect)
         scale = 3
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA).convert_alpha()
         self.image.blit(self.zookeeper_sprite_sheet, (0, 0), (self.width * frame, 0, self.width, self.height))
@@ -188,7 +188,7 @@ class Zookeeper(pygame.sprite.Sprite):
 
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 24, 24, "white", 5)
 penguin = Animal("Penguin", 10, 10, 24, 24, "white", 10,penguin_sounds, pygame.image.load("images/DinoSprites.png").convert_alpha(), 100)
-elephant = Animal("Elephant", 1200, 640, 24, 24, "grey", 10, elephant_sounds, pygame.image.load("images/DinoSprites.png").convert_alpha(), 200)
+elephant = Animal("Elephant", 1200, 600, 24, 24, "grey", 10, elephant_sounds, pygame.image.load("images/DinoSprites.png").convert_alpha(), 200)
 current_animals_in_game = [penguin, elephant]
 
 # Create animation list
@@ -320,6 +320,8 @@ while game_running:
     # print(f"action: {action}, frame: {frame}, length: {length}")
 
     for animal in current_animals_in_game:
+        # Stops animal from leaving screen
+        animal.check_boundary(SCREEN_MIN_HEIGHT, SCREEN_MAX_HEIGHT, SCREEN_MIN_WIDTH, SCREEN_MAX_WIDTH)
         if zookeeper.feed(animal) and keys[pygame.K_e]:
             animal.eat_food()
 
