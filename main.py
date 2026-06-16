@@ -41,7 +41,6 @@ pygame.time.set_timer(penguin_move_event, penguin_move_time_ms)
 penguin_hunger_event = pygame.USEREVENT + 2
 pygame.time.set_timer(penguin_hunger_event, 5000) #Change back to 30000
 
-
 class Animal:
     def __init__(self, species, x_pos, y_pos, height, width, colour, movement_speed, sounds, animal_sprite_sheet, hunger=100):
         self.species = species
@@ -187,7 +186,7 @@ class Zookeeper(pygame.sprite.Sprite):
             return False
 
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 24, 24, "white", 5)
-penguin = Animal("Penguin", 10, 10, 24, 24, "white", 10,penguin_sounds, pygame.image.load("images/DinoSprites.png").convert_alpha(), 100)
+penguin = Animal("Penguin", 10, 10, 35, 64, "white", 10,penguin_sounds, pygame.image.load("images/penguin_simple.png").convert_alpha(), 100)
 elephant = Animal("Elephant", 1200, 600, 24, 24, "grey", 10, elephant_sounds, pygame.image.load("images/DinoSprites.png").convert_alpha(), 200)
 current_animals_in_game = [penguin, elephant]
 

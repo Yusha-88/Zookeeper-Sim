@@ -1,6 +1,8 @@
 Change log
 
-13/06/26 - Moved the Animal NPCs boundary check from move() to a separate function check_boundary(). 
+16/06/26 - Added in spritesheet for penguin NPC, replacing in placeholder. 
+
+13/06/26 - Moved the Animal NPCs boundary check from move() to a separate function check_boundary().
 
 13/05/26 - Stopped Animal NPCs from moving off-screen. 
 
