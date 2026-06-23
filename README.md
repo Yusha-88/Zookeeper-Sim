@@ -1,5 +1,7 @@
 Change log
 
+23/06/26 - Added in spritesheet for elephant and tiger NPC.
+
 16/06/26 - Added in spritesheet for penguin NPC, replacing in placeholder. 
 
 13/06/26 - Moved the Animal NPCs boundary check from move() to a separate function check_boundary().

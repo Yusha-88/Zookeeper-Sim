@@ -30,8 +30,10 @@ flip_image = False
 penguin_squeak = pygame.mixer.Sound('sounds/penguin_squeak.wav')
 elephant_sound = pygame.mixer.Sound('sounds/elephant_sound.mp3')
 eating_sound = pygame.mixer.Sound('sounds/eating_sound.wav')
+tiger_sound = pygame.mixer.Sound('sounds/tiger_sound.wav')
 penguin_sounds = [penguin_squeak]
 elephant_sounds = [elephant_sound]
+tiger_sounds = [tiger_sound]
 
 # Creating timed events of Pygame's queue
 penguin_move_event = pygame.USEREVENT + 1
@@ -65,7 +67,9 @@ class Animal:
 
     def display(self, frame):
         # self.animalRect = pygame.draw.rect(screen,self.colour, self.animalRect)
-        scale = 3
+        scale = 2
+        if self.species == "Elephant":
+            scale = 1.5
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA).convert_alpha()
         self.image.blit(self.animal_sprite_sheet, (0, 0), (self.width * frame, 0, self.width, self.height))
         self.image = pygame.transform.scale(self.image, (self.width * scale, self.height * scale))
@@ -92,7 +96,7 @@ class Animal:
             self.animalRect.x = 5
         if self.animalRect.x >= max_width - (self.height + 40):
             self.animalRect.x = max_width - (self.height + 40)
-        print(f"{self.species} Movement Logging: x: {self.animalRect.x}, y: {self.animalRect.y}, movement_speed:{self.movement_speed}")
+        # print(f"{self.species} Movement Logging: x: {self.animalRect.x}, y: {self.animalRect.y}, movement_speed:{self.movement_speed}")
 
     def drain_hunger(self):
         if self.hunger > 0:
@@ -156,7 +160,7 @@ class Zookeeper(pygame.sprite.Sprite):
     def move(self, x_direction, y_direction):
         self.zookeeperRect.x += self.movement_speed * x_direction
         self.zookeeperRect.y += self.movement_speed * y_direction
-        print(f"Zookeeper x-position: {self.zookeeperRect.x}, y_position: {self.zookeeperRect.y}, right: {self.zookeeperRect.right}, height: {self.zookeeperRect.width}, width: {self.zookeeperRect.height}")
+        # print(f"Zookeeper x-position: {self.zookeeperRect.x}, y_position: {self.zookeeperRect.y}, right: {self.zookeeperRect.right}, height: {self.zookeeperRect.width}, width: {self.zookeeperRect.height}")
 
     def collide(self, animal):
         if (self.zookeeperRect.right - animal.animalRect.left) < (self.zookeeperRect.bottom - animal.animalRect.top):
@@ -186,14 +190,16 @@ class Zookeeper(pygame.sprite.Sprite):
             return False
 
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 24, 24, "white", 5)
-penguin = Animal("Penguin", 10, 10, 35, 64, "white", 10,penguin_sounds, pygame.image.load("images/penguin_simple.png").convert_alpha(), 100)
-elephant = Animal("Elephant", 1200, 600, 24, 24, "grey", 10, elephant_sounds, pygame.image.load("images/DinoSprites.png").convert_alpha(), 200)
-current_animals_in_game = [penguin, elephant]
+penguin = Animal("Penguin", 80, 80, 35, 64, "white", 10,penguin_sounds, pygame.image.load("images/penguin_simple.png").convert_alpha(), 100)
+elephant = Animal("Elephant", 700, 400, 90, 128, "grey", 10, elephant_sounds, pygame.image.load("images/elephant_simple.png").convert_alpha(), 200)
+tiger = Animal("Tiger", 1100, 80, 90, 96, "yellow", 10, tiger_sounds, pygame.image.load("images/tiger_simple.png").convert_alpha(), 100)
+current_animals_in_game = [penguin, elephant, tiger]
 
 # Create animation list
 animation_list = []
 animation_list_penguin = []
 animation_list_elephant = []
+animation_list_tiger = []
 animation_step = [4,6]
 action = 0 # This picks a set of animation from animation list
 previous_action = action
@@ -205,6 +211,7 @@ cooldown = 100
 frame = 0
 penguin_frame = 0
 elephant_frame = 0
+tiger_frame = 0
 current_zookeeper_image = ""
 previous_key = ""
 
@@ -213,14 +220,17 @@ for animation in animation_step:
     temp_img_list = []
     temp_img_list2 = []
     temp_img_list3 = []
+    temp_img_list4 = []
     for _ in range(animation):
         temp_img_list.append(zookeeper.display(step_counter))
         temp_img_list2.append(penguin.display(step_counter))
         temp_img_list3.append(elephant.display(step_counter))
+        temp_img_list4.append(tiger.display(step_counter))
         step_counter += 1
     animation_list.append(temp_img_list)
     animation_list_penguin.append(temp_img_list2)
     animation_list_elephant.append(temp_img_list3)
+    animation_list_tiger.append(temp_img_list4)
 
 while game_running:
     keys = pygame.key.get_pressed()
@@ -243,6 +253,7 @@ while game_running:
     if animal_action != previous_animal_action:
         penguin_frame = 0
         elephant_frame = 0
+        tiger_frame = 0
         previous_animal_action = animal_action
 
     # # Do logical updates here.
@@ -255,6 +266,10 @@ while game_running:
         zookeeper.collide(elephant)
         if keys[pygame.K_e]:
             elephant.eat_food()
+    if zookeeper.zookeeperRect.colliderect(tiger.animalRect):
+        zookeeper.collide(tiger)
+        if keys[pygame.K_e]:
+            tiger.eat_food()
     if keys[pygame.K_d]:
         zookeeper.move(1, 0)
         action = 1
@@ -286,6 +301,7 @@ while game_running:
         frame += 1
         penguin_frame += 1
         elephant_frame += 1
+        tiger_frame += 1
         last_update = current_time
         if frame >= len(animation_list[action]):
             frame = 0
@@ -293,11 +309,14 @@ while game_running:
             penguin_frame = 0
         if elephant_frame >= len(animation_list_elephant[animal_action]):
             elephant_frame = 0
+        if tiger_frame >= len(animation_list_tiger[animal_action]):
+            tiger_frame = 0
 
     # Show zookeeper frame
     current_zookeeper_image = animation_list[action][frame]
     current_penguin_image = animation_list_penguin[animal_action][penguin_frame]
     current_elephant_image = animation_list_elephant[animal_action][elephant_frame]
+    current_tiger_image = animation_list_tiger[animal_action][tiger_frame]
 
     # Flip the zookeeper sprite in the direction of movement
     if previous_key == "a":
@@ -313,6 +332,11 @@ while game_running:
     else:
         elephant_death_sprite = pygame.transform.grayscale(animation_list_elephant[0][0])
         screen.blit(elephant_death_sprite, elephant.animalRect)
+    if tiger.alive:
+        screen.blit(current_tiger_image, tiger.animalRect)
+    else:
+        tiger_death_sprite = pygame.transform.grayscale(animation_list_tiger[0][0])
+        screen.blit(tiger_death_sprite, tiger.animalRect)
 
     # Below is for testing purposes
     # length = len(animation_list[action])
