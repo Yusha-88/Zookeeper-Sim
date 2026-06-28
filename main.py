@@ -31,9 +31,11 @@ penguin_squeak = pygame.mixer.Sound('sounds/penguin_squeak.wav')
 elephant_sound = pygame.mixer.Sound('sounds/elephant_sound.mp3')
 eating_sound = pygame.mixer.Sound('sounds/eating_sound.wav')
 tiger_sound = pygame.mixer.Sound('sounds/tiger_sound.wav')
+zebra_sound = pygame.mixer.Sound('sounds/zebra_sound.wav')
 penguin_sounds = [penguin_squeak]
 elephant_sounds = [elephant_sound]
 tiger_sounds = [tiger_sound]
+zebra_sounds = [zebra_sound]
 
 # Creating timed events of Pygame's queue
 penguin_move_event = pygame.USEREVENT + 1
@@ -193,13 +195,15 @@ zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 24, 24
 penguin = Animal("Penguin", 80, 80, 35, 64, "white", 10,penguin_sounds, pygame.image.load("images/penguin_simple.png").convert_alpha(), 100)
 elephant = Animal("Elephant", 700, 400, 90, 128, "grey", 10, elephant_sounds, pygame.image.load("images/elephant_simple.png").convert_alpha(), 200)
 tiger = Animal("Tiger", 1100, 80, 90, 96, "yellow", 10, tiger_sounds, pygame.image.load("images/tiger_simple.png").convert_alpha(), 100)
-current_animals_in_game = [penguin, elephant, tiger]
+zebra = Animal("Zebra", 50, 550, 80, 84,"black", 10, zebra_sounds, pygame.image.load("images/zebra_simple.png").convert_alpha(), 100)
+current_animals_in_game = [penguin, elephant, tiger, zebra]
 
 # Create animation list
 animation_list = []
 animation_list_penguin = []
 animation_list_elephant = []
 animation_list_tiger = []
+animation_list_zebra = []
 animation_step = [4,6]
 action = 0 # This picks a set of animation from animation list
 previous_action = action
@@ -212,6 +216,7 @@ frame = 0
 penguin_frame = 0
 elephant_frame = 0
 tiger_frame = 0
+zebra_frame = 0
 current_zookeeper_image = ""
 previous_key = ""
 
@@ -221,16 +226,19 @@ for animation in animation_step:
     temp_img_list2 = []
     temp_img_list3 = []
     temp_img_list4 = []
+    temp_img_list5 = []
     for _ in range(animation):
         temp_img_list.append(zookeeper.display(step_counter))
         temp_img_list2.append(penguin.display(step_counter))
         temp_img_list3.append(elephant.display(step_counter))
         temp_img_list4.append(tiger.display(step_counter))
+        temp_img_list5.append(zebra.display(step_counter))
         step_counter += 1
     animation_list.append(temp_img_list)
     animation_list_penguin.append(temp_img_list2)
     animation_list_elephant.append(temp_img_list3)
     animation_list_tiger.append(temp_img_list4)
+    animation_list_zebra.append(temp_img_list5)
 
 while game_running:
     keys = pygame.key.get_pressed()
@@ -254,6 +262,7 @@ while game_running:
         penguin_frame = 0
         elephant_frame = 0
         tiger_frame = 0
+        zebra_frame = 0
         previous_animal_action = animal_action
 
     # # Do logical updates here.
@@ -270,6 +279,10 @@ while game_running:
         zookeeper.collide(tiger)
         if keys[pygame.K_e]:
             tiger.eat_food()
+    if zookeeper.zookeeperRect.colliderect(zebra.animalRect):
+        zookeeper.collide(zebra)
+        if keys[pygame.K_e]:
+            zebra.eat_food()
     if keys[pygame.K_d]:
         zookeeper.move(1, 0)
         action = 1
@@ -311,12 +324,15 @@ while game_running:
             elephant_frame = 0
         if tiger_frame >= len(animation_list_tiger[animal_action]):
             tiger_frame = 0
+        if zebra_frame >= len(animation_list_zebra[animal_action]):
+            zebra_frame = 0
 
     # Show zookeeper frame
     current_zookeeper_image = animation_list[action][frame]
     current_penguin_image = animation_list_penguin[animal_action][penguin_frame]
     current_elephant_image = animation_list_elephant[animal_action][elephant_frame]
     current_tiger_image = animation_list_tiger[animal_action][tiger_frame]
+    current_zebra_image = animation_list_zebra[animal_action][zebra_frame]
 
     # Flip the zookeeper sprite in the direction of movement
     if previous_key == "a":
@@ -337,6 +353,11 @@ while game_running:
     else:
         tiger_death_sprite = pygame.transform.grayscale(animation_list_tiger[0][0])
         screen.blit(tiger_death_sprite, tiger.animalRect)
+    if zebra.alive:
+        screen.blit(current_zebra_image, zebra.animalRect)
+    else:
+        zebra_death_sprite = pygame.transform.grayscale(animation_list_zebra[0][0])
+        screen.blit(zebra_death_sprite, zebra.animalRect)
 
     # Below is for testing purposes
     # length = len(animation_list[action])

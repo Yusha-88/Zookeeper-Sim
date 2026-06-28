@@ -1,5 +1,7 @@
 Change log
 
+28/06/26 - Added spritesheet for zebra NPC.
+
 23/06/26 - Added in spritesheet for elephant and tiger NPC.
 
 16/06/26 - Added in spritesheet for penguin NPC, replacing in placeholder. 
