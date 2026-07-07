@@ -12,6 +12,8 @@ SCREEN_MAX_WIDTH = 1280
 SCREEN_MIN_HEIGHT = 2
 SCREEN_MAX_HEIGHT = 720
 
+game_background = pygame.image.load('images/zoo_background_topdown.png')
+
 pygame.display.set_caption("Zookeeper")
 
 clock = pygame.time.Clock()
@@ -241,6 +243,7 @@ for animation in animation_step:
     animation_list_zebra.append(temp_img_list5)
 
 while game_running:
+
     keys = pygame.key.get_pressed()
 
     animal_action = 0
@@ -306,7 +309,8 @@ while game_running:
     # This stops zookeeper from leaving boundary when colliding with animal
     zookeeper.check_boundary(SCREEN_MIN_WIDTH, SCREEN_MAX_WIDTH, SCREEN_MIN_HEIGHT, SCREEN_MAX_HEIGHT)
 
-    screen.fill(ZOO_BACKGROUND_COLOUR)  # Fill the display with a solid colour
+    # Load in game background of the zoo
+    screen.blit(game_background, (0, 0))
 
     # Update animation
     current_time = pygame.time.get_ticks()

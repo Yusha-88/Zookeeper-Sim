@@ -1,5 +1,7 @@
 Change log
 
+7/07/26 - Fixed issue where zebra NPC wasn't being animated properly and added final background of the zoo.
+
 28/06/26 - Added spritesheet for zebra NPC.
 
 23/06/26 - Added in spritesheet for elephant and tiger NPC.
