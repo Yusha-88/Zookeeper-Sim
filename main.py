@@ -153,7 +153,7 @@ class Zookeeper(pygame.sprite.Sprite):
         self.zookeeperRect = pygame.Rect(x_pos,y_pos, height, width)
 
     def display(self, frame):
-        scale = 3
+        scale = 2.5
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA).convert_alpha()
         self.image.blit(self.zookeeper_sprite_sheet, (0, 0), (self.width * frame, 0, self.width, self.height))
         self.image = pygame.transform.scale(self.image, (self.width * scale, self.height * scale))
@@ -315,6 +315,7 @@ while game_running:
         penguin_frame += 1
         elephant_frame += 1
         tiger_frame += 1
+        zebra_frame += 1
         last_update = current_time
         if frame >= len(animation_list[action]):
             frame = 0
