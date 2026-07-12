@@ -22,6 +22,8 @@ game_running = True
 
 # Initialising variables
 ZOO_BACKGROUND_COLOUR = (126, 200, 80) # Light green
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 ZOOKEEPER_STARTING_X_POS = 30
 ZOOKEEPER_STARTING_Y_POS = 30
 x_direction = 0
@@ -64,6 +66,7 @@ class Animal:
             raise ValueError("Hunger must be equal to or greater than 100")
         self.hunger = hunger
         self.starting_hunger = hunger # Used to compare in-game hunger level to it's initial level via react_to_hunger
+        self.hungry = False # Used to check if the animal is hungry so text can be printed to screen
         self.alive = True
         self.animalRect = pygame.Rect(x_pos, y_pos, height, width)
         self.animal_sprite_sheet = animal_sprite_sheet
@@ -112,7 +115,8 @@ class Animal:
             if self.hunger == (self.starting_hunger * 0.5):
                 self.starting_movement_speed = int(self.starting_movement_speed * 0.75)
                 self.ask_for_food()
-                print(f"{self.species} is hungry! Movement speed: {self.starting_movement_speed}")
+                self.hungry = True
+                # print(f"{self.species} is hungry! Movement speed: {self.starting_movement_speed}")
             elif self.hunger == (self.starting_hunger * 0.2):
                 self.starting_movement_speed = int(self.starting_movement_speed * 0.50)
                 print(f"{self.species} is starving! Movement speed: {self.starting_movement_speed}")
@@ -129,10 +133,17 @@ class Animal:
         loop_no = random.randint(1,3)
         pygame.mixer.Sound.play(self.sounds[0], loop_no)
 
+    def print_hunger_text_to_screen(self):
+        print(f"{self.species} is hungry! Movement speed: {self.starting_movement_speed}")
+        font = pygame.font.Font(None, 36)
+        text_surface = font.render(f"{self.species} is hungry!", True, BLACK)
+        screen.blit(text_surface, (self.animalRect.x+100, self.animalRect.y+100))
+
     def eat_food(self):
         if self.alive:
             if self.hunger < (self.starting_hunger * 0.7):
                 self.hunger = self.starting_hunger
+                self.hungry = False
                 pygame.mixer.Sound.play(eating_sound)
                 print(f"{self.species} hunger level: {self.hunger}. {self.species} fed!")
             else:
@@ -196,7 +207,7 @@ class Zookeeper(pygame.sprite.Sprite):
 zookeeper = Zookeeper(ZOOKEEPER_STARTING_X_POS, ZOOKEEPER_STARTING_Y_POS, 24, 24, "white", 5)
 penguin = Animal("Penguin", 80, 80, 35, 64, "white", 10,penguin_sounds, pygame.image.load("images/penguin_simple.png").convert_alpha(), 100)
 elephant = Animal("Elephant", 700, 400, 90, 128, "grey", 10, elephant_sounds, pygame.image.load("images/elephant_simple.png").convert_alpha(), 200)
-tiger = Animal("Tiger", 1100, 80, 90, 96, "yellow", 10, tiger_sounds, pygame.image.load("images/tiger_simple.png").convert_alpha(), 100)
+tiger = Animal("Tiger", 900, 80, 90, 96, "yellow", 10, tiger_sounds, pygame.image.load("images/tiger_simple.png").convert_alpha(), 100)
 zebra = Animal("Zebra", 50, 550, 80, 84,"black", 10, zebra_sounds, pygame.image.load("images/zebra_simple.png").convert_alpha(), 100)
 current_animals_in_game = [penguin, elephant, tiger, zebra]
 
@@ -311,6 +322,11 @@ while game_running:
 
     # Load in game background of the zoo
     screen.blit(game_background, (0, 0))
+
+    # This prints text to the screen letting the player know the animal is hungry
+    for animal in current_animals_in_game:
+        if animal.hungry:
+            animal.print_hunger_text_to_screen()
 
     # Update animation
     current_time = pygame.time.get_ticks()
