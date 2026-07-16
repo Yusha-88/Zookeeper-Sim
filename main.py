@@ -82,7 +82,6 @@ class Animal:
         self.image = pygame.transform.scale(self.image, (self.width * scale, self.height * scale))
         return self.image
 
-    # TODO: Might need to make the constants into arguments to allow for custom boundaries for different animals
     def move(self):
         if self.alive:
             self.movement_speed = random.randint(0,self.starting_movement_speed+1)
@@ -199,7 +198,7 @@ class Zookeeper(pygame.sprite.Sprite):
 
     def feed(self, animal):
         distance_to_animal = Vector2(self.zookeeperRect.center).distance_to(animal.animalRect.center)
-        if distance_to_animal < 60:
+        if distance_to_animal < 100:
             return True
         else:
             return False
@@ -253,69 +252,96 @@ for animation in animation_step:
     animation_list_tiger.append(temp_img_list4)
     animation_list_zebra.append(temp_img_list5)
 
+game_paused = True
+
+def display_menu():
+    font = pygame.font.Font(None, 24)
+    text_surface1 = font.render("Instructions: Feed the animals when they get hungry.", True, BLACK)
+    text_surface2 = font.render("Use WASD keys to move and go near them and press 'E' to feed them.", True, BLACK)
+    text_surface3 = font.render("Each animal will cry out and text will show they are hungry. Starving animals will eventually die!", True, BLACK)
+    text_surface4 = font.render("Press Escape to continue. (Press Escape in-game to pause).", True, BLACK)
+    menu = pygame.Surface((800, 300))
+    menu.fill((220, 220, 220))
+    menu.blit(text_surface1, (50, 50))
+    menu.blit(text_surface2, (50, 100))
+    menu.blit(text_surface3, (50, 150))
+    menu.blit(text_surface4, (50, 200))
+    screen.blit(menu, (250, 160))
+
 while game_running:
 
     keys = pygame.key.get_pressed()
 
     animal_action = 0
     for event in pygame.event.get():
-        if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+        if event.type == pygame.QUIT:
             pygame.quit()
             raise SystemExit
+        elif keys[pygame.K_ESCAPE]:
+            if game_paused:
+                game_paused = False
+            else:
+                game_paused = True
+
+
         elif event.type == penguin_move_event:
             for animal in current_animals_in_game:
                 animal.move()
                 animal_action = 1
         elif event.type == penguin_hunger_event:
             for animal in current_animals_in_game:
-                animal.drain_hunger()
-                animal.react_to_hunger()
+                if not game_paused:
+                    animal.drain_hunger()
+                    animal.react_to_hunger()
 
     # Reset frame to stop it from starting mid-iteration and going out of bounds
-    if animal_action != previous_animal_action:
-        penguin_frame = 0
-        elephant_frame = 0
-        tiger_frame = 0
-        zebra_frame = 0
-        previous_animal_action = animal_action
+    if not game_paused:
+        if animal_action != previous_animal_action:
+            penguin_frame = 0
+            elephant_frame = 0
+            tiger_frame = 0
+            zebra_frame = 0
+            previous_animal_action = animal_action
 
     # # Do logical updates here.
-    action = 0 # Reset action to stop infinite animation loop
-    if zookeeper.zookeeperRect.colliderect(penguin.animalRect):
-        zookeeper.collide(penguin)
-        if keys[pygame.K_e]:
-            penguin.eat_food()
-    if zookeeper.zookeeperRect.colliderect(elephant.animalRect):
-        zookeeper.collide(elephant)
-        if keys[pygame.K_e]:
-            elephant.eat_food()
-    if zookeeper.zookeeperRect.colliderect(tiger.animalRect):
-        zookeeper.collide(tiger)
-        if keys[pygame.K_e]:
-            tiger.eat_food()
-    if zookeeper.zookeeperRect.colliderect(zebra.animalRect):
-        zookeeper.collide(zebra)
-        if keys[pygame.K_e]:
-            zebra.eat_food()
-    if keys[pygame.K_d]:
-        zookeeper.move(1, 0)
-        action = 1
-        previous_key = "d"
-    if keys[pygame.K_a]:
-        zookeeper.move(-1, 0)
-        action = 1
-        previous_key = "a"
-    if keys[pygame.K_w]: #and zookeeper.zookeeperRect.y > SCREEN_MIN_HEIGHT:
-        zookeeper.move(0, -1)
-        action = 1
-    if keys[pygame.K_s]: #and zookeeper.zookeeperRect.y < SCREEN_MAX_HEIGHT - zookeeper.height:
-        zookeeper.move(0, 1)
-        action = 1
+    if not game_paused:
+        action = 0 # Reset action to stop infinite animation loop
+        if zookeeper.zookeeperRect.colliderect(penguin.animalRect):
+            zookeeper.collide(penguin)
+            if keys[pygame.K_e]:
+                penguin.eat_food()
+        if zookeeper.zookeeperRect.colliderect(elephant.animalRect):
+            zookeeper.collide(elephant)
+            if keys[pygame.K_e]:
+                elephant.eat_food()
+        if zookeeper.zookeeperRect.colliderect(tiger.animalRect):
+            zookeeper.collide(tiger)
+            if keys[pygame.K_e]:
+                tiger.eat_food()
+        if zookeeper.zookeeperRect.colliderect(zebra.animalRect):
+            zookeeper.collide(zebra)
+            if keys[pygame.K_e]:
+                zebra.eat_food()
+        if keys[pygame.K_d]:
+            zookeeper.move(1, 0)
+            action = 1
+            previous_key = "d"
+        if keys[pygame.K_a]:
+            zookeeper.move(-1, 0)
+            action = 1
+            previous_key = "a"
+        if keys[pygame.K_w]: #and zookeeper.zookeeperRect.y > SCREEN_MIN_HEIGHT:
+            zookeeper.move(0, -1)
+            action = 1
+        if keys[pygame.K_s]: #and zookeeper.zookeeperRect.y < SCREEN_MAX_HEIGHT - zookeeper.height:
+            zookeeper.move(0, 1)
+            action = 1
 
     # Reset frame to stop it from starting mid-iteration and going out of bounds
-    if action != previous_action:
-        frame = 0
-        previous_action = action
+    if not game_paused:
+        if action != previous_action:
+            frame = 0
+            previous_action = action
 
     # This stops zookeeper from leaving boundary when colliding with animal
     zookeeper.check_boundary(SCREEN_MIN_WIDTH, SCREEN_MAX_WIDTH, SCREEN_MIN_HEIGHT, SCREEN_MAX_HEIGHT)
@@ -323,72 +349,82 @@ while game_running:
     # Load in game background of the zoo
     screen.blit(game_background, (0, 0))
 
+    # Menu pause screen
+    if game_paused:
+        display_menu()
+
+
+
     # This prints text to the screen letting the player know the animal is hungry
-    for animal in current_animals_in_game:
-        if animal.hungry:
-            animal.print_hunger_text_to_screen()
+    if not game_paused:
+        for animal in current_animals_in_game:
+            if animal.hungry:
+                animal.print_hunger_text_to_screen()
 
     # Update animation
-    current_time = pygame.time.get_ticks()
-    if current_time - last_update >= cooldown:
-        frame += 1
-        penguin_frame += 1
-        elephant_frame += 1
-        tiger_frame += 1
-        zebra_frame += 1
-        last_update = current_time
-        if frame >= len(animation_list[action]):
-            frame = 0
-        if penguin_frame >= len(animation_list_penguin[animal_action]):
-            penguin_frame = 0
-        if elephant_frame >= len(animation_list_elephant[animal_action]):
-            elephant_frame = 0
-        if tiger_frame >= len(animation_list_tiger[animal_action]):
-            tiger_frame = 0
-        if zebra_frame >= len(animation_list_zebra[animal_action]):
-            zebra_frame = 0
+    if not game_paused:
+        current_time = pygame.time.get_ticks()
+        if current_time - last_update >= cooldown:
+            frame += 1
+            penguin_frame += 1
+            elephant_frame += 1
+            tiger_frame += 1
+            zebra_frame += 1
+            last_update = current_time
+            if frame >= len(animation_list[action]):
+                frame = 0
+            if penguin_frame >= len(animation_list_penguin[animal_action]):
+                penguin_frame = 0
+            if elephant_frame >= len(animation_list_elephant[animal_action]):
+                elephant_frame = 0
+            if tiger_frame >= len(animation_list_tiger[animal_action]):
+                tiger_frame = 0
+            if zebra_frame >= len(animation_list_zebra[animal_action]):
+                zebra_frame = 0
 
     # Show zookeeper frame
-    current_zookeeper_image = animation_list[action][frame]
-    current_penguin_image = animation_list_penguin[animal_action][penguin_frame]
-    current_elephant_image = animation_list_elephant[animal_action][elephant_frame]
-    current_tiger_image = animation_list_tiger[animal_action][tiger_frame]
-    current_zebra_image = animation_list_zebra[animal_action][zebra_frame]
+    if not game_paused:
+        current_zookeeper_image = animation_list[action][frame]
+        current_penguin_image = animation_list_penguin[animal_action][penguin_frame]
+        current_elephant_image = animation_list_elephant[animal_action][elephant_frame]
+        current_tiger_image = animation_list_tiger[animal_action][tiger_frame]
+        current_zebra_image = animation_list_zebra[animal_action][zebra_frame]
 
     # Flip the zookeeper sprite in the direction of movement
-    if previous_key == "a":
-        current_zookeeper_image = pygame.transform.flip(current_zookeeper_image, True, False)
-    screen.blit(current_zookeeper_image, zookeeper.zookeeperRect)
-    if penguin.alive:
-        screen.blit(current_penguin_image, penguin.animalRect)
-    else: # Show death sprite
-        penguin_death_sprite = pygame.transform.grayscale(animation_list_penguin[0][0])
-        screen.blit(penguin_death_sprite, penguin.animalRect)
-    if elephant.alive:
-        screen.blit(current_elephant_image, elephant.animalRect)
-    else:
-        elephant_death_sprite = pygame.transform.grayscale(animation_list_elephant[0][0])
-        screen.blit(elephant_death_sprite, elephant.animalRect)
-    if tiger.alive:
-        screen.blit(current_tiger_image, tiger.animalRect)
-    else:
-        tiger_death_sprite = pygame.transform.grayscale(animation_list_tiger[0][0])
-        screen.blit(tiger_death_sprite, tiger.animalRect)
-    if zebra.alive:
-        screen.blit(current_zebra_image, zebra.animalRect)
-    else:
-        zebra_death_sprite = pygame.transform.grayscale(animation_list_zebra[0][0])
-        screen.blit(zebra_death_sprite, zebra.animalRect)
+    if not game_paused:
+        if previous_key == "a":
+            current_zookeeper_image = pygame.transform.flip(current_zookeeper_image, True, False)
+        screen.blit(current_zookeeper_image, zookeeper.zookeeperRect)
+        if penguin.alive:
+            screen.blit(current_penguin_image, penguin.animalRect)
+        else: # Show death sprite
+            penguin_death_sprite = pygame.transform.grayscale(animation_list_penguin[0][0])
+            screen.blit(penguin_death_sprite, penguin.animalRect)
+        if elephant.alive:
+            screen.blit(current_elephant_image, elephant.animalRect)
+        else:
+            elephant_death_sprite = pygame.transform.grayscale(animation_list_elephant[0][0])
+            screen.blit(elephant_death_sprite, elephant.animalRect)
+        if tiger.alive:
+            screen.blit(current_tiger_image, tiger.animalRect)
+        else:
+            tiger_death_sprite = pygame.transform.grayscale(animation_list_tiger[0][0])
+            screen.blit(tiger_death_sprite, tiger.animalRect)
+        if zebra.alive:
+            screen.blit(current_zebra_image, zebra.animalRect)
+        else:
+            zebra_death_sprite = pygame.transform.grayscale(animation_list_zebra[0][0])
+            screen.blit(zebra_death_sprite, zebra.animalRect)
 
     # Below is for testing purposes
     # length = len(animation_list[action])
     # print(f"action: {action}, frame: {frame}, length: {length}")
-
-    for animal in current_animals_in_game:
-        # Stops animal from leaving screen
-        animal.check_boundary(SCREEN_MIN_HEIGHT, SCREEN_MAX_HEIGHT, SCREEN_MIN_WIDTH, SCREEN_MAX_WIDTH)
-        if zookeeper.feed(animal) and keys[pygame.K_e]:
-            animal.eat_food()
+    if not game_paused:
+        for animal in current_animals_in_game:
+            # Stops animal from leaving screen
+            animal.check_boundary(SCREEN_MIN_HEIGHT, SCREEN_MAX_HEIGHT, SCREEN_MIN_WIDTH, SCREEN_MAX_WIDTH)
+            if zookeeper.feed(animal) and keys[pygame.K_e]:
+                animal.eat_food()
 
     pygame.display.flip()  # Refresh on-screen display
     clock.tick(60)         # wait until next frame (at 60 FPS)

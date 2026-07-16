@@ -1,5 +1,7 @@
 Change log
 
+16/07/26 - Added pause menu that doubles as a starter menu with instructions.
+
 12/07/26 - Text displays near animals to alert the player of their hunger.
 
 7/07/26 - Fixed issue where zebra NPC wasn't being animated properly and added final background of the zoo.
