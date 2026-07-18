@@ -122,6 +122,7 @@ class Animal:
                 self.cry_for_food()
             elif self.hunger == 0:
                 self.alive = False
+                self.hungry = False
                 self.colour = "Black"
                 print(f"{self.species} has died of starvation!")
 
@@ -136,7 +137,18 @@ class Animal:
         print(f"{self.species} is hungry! Movement speed: {self.starting_movement_speed}")
         font = pygame.font.Font(None, 36)
         text_surface = font.render(f"{self.species} is hungry!", True, BLACK)
-        screen.blit(text_surface, (self.animalRect.x+100, self.animalRect.y+100))
+        if self.species == "Elephant":
+            screen.blit(text_surface, (self.animalRect.x+100, self.animalRect.y+140))
+        else:
+            screen.blit(text_surface, (self.animalRect.x+100, self.animalRect.y+100))
+
+    def print_death_text_to_screen(self):
+        font = pygame.font.Font(None, 36)
+        text_surface = font.render(f"{self.species} has died.", True, BLACK)
+        if self.species == "Elephant":
+            screen.blit(text_surface, (self.animalRect.x + 100, self.animalRect.y + 140))
+        else:
+            screen.blit(text_surface, (self.animalRect.x+100, self.animalRect.y+100))
 
     def eat_food(self):
         if self.alive:
@@ -257,7 +269,7 @@ game_paused = True
 def display_menu():
     font = pygame.font.Font(None, 24)
     text_surface1 = font.render("Instructions: Feed the animals when they get hungry.", True, BLACK)
-    text_surface2 = font.render("Use WASD keys to move and go near them and press 'E' to feed them.", True, BLACK)
+    text_surface2 = font.render("Use WASD keys to move. Go near them and press 'E' to feed.", True, BLACK)
     text_surface3 = font.render("Each animal will cry out and text will show they are hungry. Starving animals will eventually die!", True, BLACK)
     text_surface4 = font.render("Press Escape to continue. (Press Escape in-game to pause).", True, BLACK)
     menu = pygame.Surface((800, 300))
@@ -353,13 +365,13 @@ while game_running:
     if game_paused:
         display_menu()
 
-
-
     # This prints text to the screen letting the player know the animal is hungry
     if not game_paused:
         for animal in current_animals_in_game:
             if animal.hungry:
                 animal.print_hunger_text_to_screen()
+            elif not animal.alive:
+                animal.print_death_text_to_screen()
 
     # Update animation
     if not game_paused:

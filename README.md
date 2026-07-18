@@ -1,5 +1,7 @@
 Change log
 
+18/07/26 - Added text that prints animal death status to screen.
+
 16/07/26 - Added pause menu that doubles as a starter menu with instructions.
 
 12/07/26 - Text displays near animals to alert the player of their hunger.
